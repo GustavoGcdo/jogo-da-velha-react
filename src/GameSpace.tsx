@@ -18,7 +18,7 @@ const GameSpace = ({ child, onClick, position }: Props) => {
     <div
       ref={setNodeRef}
       onClick={onClick}
-      className={`flex items-center justify-center w-[200px] h-[200px] hover:bg-black/5 cursor-pointer`}
+      className={`flex items-center justify-center w-full h-full bg-orange-400 rounded cursor-pointer`}
     >
       {child}
     </div>

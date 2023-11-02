@@ -1,3 +1,4 @@
+/* eslint-disable no-debugger */
 export type GameSymbol = 'X' | 'O' | '';
 export type Position = { row: number; collumn: number };
 
@@ -15,6 +16,7 @@ export class Game {
   }
 
   mark(quadrant: [number, number]) {
+    console.log('mark');
     const [row, collumn] = quadrant;
     if (
       (this.currentPlayer == 'X' && this.quantityX == 3) ||
@@ -23,19 +25,27 @@ export class Game {
       return;
     }
 
-    if (this.currentPlayer == 'X') this.quantityX++;
-    else this.quantityO++;
-
+    
     if (this.gameSpaces[row][collumn] == '') {
+      if (this.currentPlayer == 'X') this.quantityX++;
+      else this.quantityO++;
+      
       this.gameSpaces[row][collumn] = this.currentPlayer;
       this.nextPlayer();
     }
   }
 
   move(oldPosition: Position, newPosition: Position) {
+    console.log('move');
+    if (this.gameSpaces[newPosition.row][newPosition.collumn] != '') return;
+    if (this.gameSpaces[oldPosition.row][oldPosition.collumn] != this.currentPlayer) return;
+    if (oldPosition.row == newPosition.row && oldPosition.collumn == newPosition.collumn) return;
+    
+
     const symbol = this.gameSpaces[oldPosition.row][oldPosition.collumn];
-    this.gameSpaces[newPosition.row][newPosition.collumn] = symbol;
     this.gameSpaces[oldPosition.row][oldPosition.collumn] = '';
+    this.gameSpaces[newPosition.row][newPosition.collumn] = symbol;
+    this.nextPlayer();
   }
 
   private nextPlayer() {
@@ -93,14 +103,13 @@ export class Game {
     return false;
   }
 
-  hasWinner() {
-    if (this.checkPlayerHasWinner('X')) return true;
-    if (this.checkPlayerHasWinner('O')) return true;
-    return false;
+  getWinner(): GameSymbol | undefined {
+    if (this.checkPlayerHasWinner('X')) return 'X';
+    if (this.checkPlayerHasWinner('O')) return 'O';
   }
 
   hasFinish() {
-    if (this.hasWinner()) return true;
+    if (this.getWinner()) return true;
 
     for (let i = 0; i < this.gameSpaces.length; i++) {
       const row = this.gameSpaces[i];

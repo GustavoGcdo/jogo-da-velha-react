@@ -23,8 +23,8 @@ const PlayerSymbol = ({ symbol, position }: Props) => {
 
   return (
     <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
-      <div className={`flex items-center justify-center w-[100px] h-[100px] text-3xl`}>
-        {symbol}
+      <div className={`flex items-center justify-center text-3xl  font-bold`}>
+        <span className={`${symbol == 'X' ? 'text-stone-800' : 'text-white'}`}>{symbol}</span>
       </div>
     </div>
   );
