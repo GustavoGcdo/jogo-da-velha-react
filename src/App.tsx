@@ -30,9 +30,6 @@ function App() {
   };
 
   const move = (oldPosition: Position, newPosition: Position) => {
-    console.log(oldPosition);
-    console.log(newPosition);
-
     game.move(oldPosition, newPosition);
     setGameSpaces([...game.gameSpaces]);
   };
@@ -45,7 +42,12 @@ function App() {
 
   const getFinishMessage = () => {
     const winner = game.getWinner();
-    if (winner) return  <span>Jogador <span className='font-bold'>{winner}</span> Ganhou!!</span>;
+    if (winner)
+      return (
+        <span>
+          Jogador <span className="font-bold">{winner}</span> Ganhou!!
+        </span>
+      );
     return `Empate!!`;
   };
 
@@ -54,7 +56,9 @@ function App() {
       <div className="mx-auto w-fit my-4">
         <h2 className="text-2xl font-mono uppercase">
           Jogo da velha 3
-          <span className="ml-2 text-sm align-text-top bg-black text-white rounded px-1">beta</span>
+          <span className="ml-2 text-sm align-text-top bg-black text-white rounded px-1">
+            {APP_VERSION}
+          </span>
         </h2>
       </div>
       {finishGame && (
@@ -66,7 +70,7 @@ function App() {
           <div className="h-full flex items-center justify-center">
             <div className="flex flex-col gap-2 items-center bg-white p-10 rounded">
               <span className="text-xl mx-auto">Fim de jogo!</span>
-              <span className='text-2xl my-6'>{getFinishMessage()} </span>
+              <span className="text-2xl my-6">{getFinishMessage()} </span>
               <button
                 onClick={resetGame}
                 className="bg-orange-400 text-white font-semibold w-fit p-2 px-6 rounded-lg text-lg block text-center mx-auto"
@@ -88,10 +92,9 @@ function App() {
               move({ row, collumn }, { row: rowTo, collumn: collumnTo });
             }}
           >
-            {gameSpaces.map((line, row) => (
-              // <div key={`row-${row}`} className="grid grid-cols-3 w-full h-full divide-x">
-              <>
-                {line.map((symbol, collumn) => (
+            {gameSpaces.map(
+              (line, row) =>
+                line.map((symbol, collumn) => (
                   <GameSpace
                     key={`key-${row}-${collumn}`}
                     position={{ row, collumn }}
@@ -102,10 +105,8 @@ function App() {
                     }
                     onClick={() => mark(row, collumn)}
                   />
-                ))}
-              </>
-              // </div>
-            ))}
+                ))
+            )}
           </DndContext>
         </div>
       </div>

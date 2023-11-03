@@ -10,13 +10,11 @@ export class Game {
   quantityO = 0;
 
   constructor() {
-    console.log('nova instancia');
     this.currentPlayer = 'X';
     this.reset();
   }
 
   mark(quadrant: [number, number]) {
-    console.log('mark');
     const [row, collumn] = quadrant;
     if (
       (this.currentPlayer == 'X' && this.quantityX == 3) ||
@@ -35,8 +33,7 @@ export class Game {
     }
   }
 
-  move(oldPosition: Position, newPosition: Position) {
-    console.log('move');
+  move(oldPosition: Position, newPosition: Position) {    
     if (this.gameSpaces[newPosition.row][newPosition.collumn] != '') return;
     if (this.gameSpaces[oldPosition.row][oldPosition.collumn] != this.currentPlayer) return;
     if (oldPosition.row == newPosition.row && oldPosition.collumn == newPosition.collumn) return;
