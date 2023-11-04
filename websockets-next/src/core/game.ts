@@ -104,8 +104,7 @@ export class Game {
     return false;
   }
 
-  getWinner(): GameSymbol | undefined {
-    if (this.explicitWinner) return this.explicitWinner;
+  getWinner(): GameSymbol | undefined {    
     if (this.checkPlayerHasWinner('X')) return 'X';
     if (this.checkPlayerHasWinner('O')) return 'O';
   }

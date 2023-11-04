@@ -80,6 +80,18 @@ const ClassicGame = () => {
           Jogador <span className="font-bold">{winner}</span> Ganhou!!
         </span>
       );
+
+    const explicitWinner = game.explicitWinner;
+    if (explicitWinner) {
+      return (
+        <span>
+          <span className="font-bold">{explicitWinner}</span> Ganhou! Pois o tempo da jogada de
+          <span className="font-semibold ml-2">{explicitWinner == 'X' ? 'O' : 'X'}</span> acabou e ele
+          não jogou.
+        </span>
+      );
+    }
+
     return `Empate!!`;
   };
 
@@ -97,13 +109,13 @@ const ClassicGame = () => {
           </span>
         </h2>
 
-        <div className="max-w-lg text-center bg-yellow-300 p-3 py-4 mt-4 rounded">
-          <h1 className="text-2xl font-bold">Modo rápido</h1>
-          <span className="text-xl block">
+        <div className="max-w-lg text-center bg-yellow-400 text-stone-700 p-3 py-4 mt-4 rounded">
+          <h1 className="text-xl font-bold">Modo rápido</h1>
+          <span className="text-lg block">
             Aqui você precisa ficar esperto com o tempo! Joque rápido e cuidado para não vacilar.
           </span>
 
-          <span className="text-xl mt-2 block">
+          <span className="text-lg mt-2 block">
             Ah!! E se não jogar no tempo, você <strong>PERDE!</strong>
           </span>
         </div>
@@ -111,9 +123,9 @@ const ClassicGame = () => {
       {finishGame && (
         <div className={`w-screen h-screen bg-black/60 absolute top-0 bottom-0 right-0 z-10`}>
           <div className="h-full flex items-center justify-center">
-            <div className="flex flex-col gap-2 items-center bg-white p-10 rounded">
-              <span className="text-xl mx-auto">Fim de jogo!</span>
-              <span className="text-2xl my-6">{getFinishMessage()} </span>
+            <div className="flex flex-col gap-2 items-center bg-white p-10 m-4 rounded">
+              <span className="text-2xl font-bold mx-auto">Fim de jogo!</span>
+              <span className="text-xl my-6">{getFinishMessage()} </span>
               <button
                 onClick={resetGame}
                 className="bg-orange-400 text-white font-semibold w-fit p-2 px-6 rounded-lg text-lg block text-center mx-auto"
@@ -126,7 +138,9 @@ const ClassicGame = () => {
       )}
 
       <div className="flex flex-col my-3">
-        <div className="text-xl">Contador: {leftTime}</div>
+        <div className="text-2xl">
+          Contador: <strong>{leftTime}</strong>s
+        </div>
       </div>
 
       <div className="flex w-full max-w-[516px] mx-auto items-center justify-center relative">
@@ -159,12 +173,15 @@ const ClassicGame = () => {
         {!gameStarted && (
           <div className="bg-black/70 absolute top-0 bottom-0 right-0 left-0 rounded">
             <div className="flex w-full h-full items-center justify-center">
-              <div className=" flex flex-col items-center gap-4 px-6 py-4 bg-white max-w-[400px] rounded">
-                <span className="text-lg">
-                  Faça um sorteio para saber quem vai começar e clique em começar{' '}
+              <div className=" flex flex-col items-center gap-4 px-6 py-6 m-4 bg-white max-w-[400px] rounded">
+                <span className="text-xl">
+                  Faça um sorteio para saber quem vai começar e clique em começar
                 </span>
 
-                <button className="p-4 bg-orange-500 text-white rounded" onClick={startGame}>
+                <button
+                  className="px-4 py-3 bg-orange-500 uppercase font-bold text-white rounded"
+                  onClick={startGame}
+                >
                   Começar
                 </button>
               </div>
