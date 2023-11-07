@@ -1,10 +1,11 @@
 'use client';
 import { DndContext, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
+import axios from 'axios';
+import Pusher from 'pusher-js';
 import { useEffect, useState } from 'react';
 import { Game, Position } from '../core/game';
 import GameSpace from './GameSpace';
 import PlayerSymbol from './PlayerSymbol';
-import React from 'react';
 
 const game = new Game();
 
@@ -12,35 +13,34 @@ export const ItemTypes = {
   PLAYER_SYMBOL: 'playerSymbol',
 };
 
-const DEFAULT_TIME_SECONDS = 5;
-
-const QuickGame = () => {
+const OnlineGame = () => {
   const [gameSpaces, setGameSpaces] = useState(game.gameSpaces);
   const [finishGame, setFinishGame] = useState(false);
   const mouseSensor = useSensor(MouseSensor);
   const touchSensor = useSensor(TouchSensor);
-  const [leftTime, setLeftTime] = useState(DEFAULT_TIME_SECONDS);
-  const [gameStarted, setStartTime] = useState(false);
-
   const sensors = useSensors(mouseSensor, touchSensor);
 
-  React.useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (leftTime > 0 && gameStarted) {
-      timer = setInterval(() => setLeftTime((time) => time - 1), 1000);
-    }
+  useEffect(() => {
+    const pusher = new Pusher(process.env.NEXT_PUBLIC_KEY || '', {
+      cluster: 'us2',
+    });
 
-    if (!gameStarted) {
-      return () => clearInterval(timer);
-    }
+    const channel = pusher.subscribe('game-changes');
 
-    if (leftTime == 0 && !finishGame) {
-      game.setExplicitWinner(game.currentPlayer == 'X' ? 'O' : 'X');
-      setFinishGame(true);
-    }
+    channel.bind('game-move', (data: Game) => {
+      console.log('eventdata', data);
 
-    return () => clearInterval(timer);
-  }, [leftTime, gameStarted, finishGame]);
+      game.currentPlayer = data.currentPlayer;
+      game.gameSpaces = data.gameSpaces;
+      game.quantityX = data.quantityX;
+      game.quantityO = data.quantityO;
+      setGameSpaces(data.gameSpaces);
+    });
+
+    return () => {
+      pusher.unsubscribe('game-move');
+    };
+  }, []);
 
   useEffect(() => {
     if (game.hasFinish()) {
@@ -48,28 +48,34 @@ const QuickGame = () => {
     }
   }, [gameSpaces]);
 
-  const mark = (row: number, collumn: number) => {
+  const mark = async (row: number, collumn: number) => {
     const hasMarked = game.mark([row, collumn]);
-    if (hasMarked) {
-      setGameSpaces([...game.gameSpaces]);
-      setLeftTime(DEFAULT_TIME_SECONDS);
-    }
+    if (!hasMarked) return;
+
+    await axios.post('/api/pusher', {
+      currentPlayer: game.currentPlayer,
+      quantityX: game.quantityX,
+      quantityO: game.quantityO,
+      gameSpaces: game.gameSpaces,
+    });
   };
 
-  const move = (oldPosition: Position, newPosition: Position) => {
+  const move = async (oldPosition: Position, newPosition: Position) => {
     const hasMoved = game.move(oldPosition, newPosition);
-    if (hasMoved) {
-      setGameSpaces([...game.gameSpaces]);
-      setLeftTime(DEFAULT_TIME_SECONDS);
-    }
+    if (!hasMoved) return;
+
+    await axios.post('/api/pusher', {
+      currentPlayer: game.currentPlayer,
+      quantityX: game.quantityX,
+      quantityO: game.quantityO,
+      gameSpaces: game.gameSpaces,
+    });
   };
 
   const resetGame = () => {
     game.reset();
     setGameSpaces([...game.gameSpaces]);
     setFinishGame(false);
-    setLeftTime(DEFAULT_TIME_SECONDS);
-    setStartTime(false);
   };
 
   const getFinishMessage = () => {
@@ -86,17 +92,13 @@ const QuickGame = () => {
       return (
         <span>
           <span className="font-bold">{explicitWinner}</span> Ganhou! Pois o tempo da jogada de
-          <span className="font-semibold ml-2">{explicitWinner == 'X' ? 'O' : 'X'}</span> acabou e ele
-          não jogou.
+          <span className="font-semibold ml-2">{explicitWinner == 'X' ? 'O' : 'X'}</span> acabou e
+          ele não jogou.
         </span>
       );
     }
 
     return `Empate!!`;
-  };
-
-  const startGame = () => {
-    setStartTime((value) => !value);
   };
 
   return (
@@ -105,21 +107,15 @@ const QuickGame = () => {
         <h2 className="text-2xl font-mono uppercase">
           Jogo da velha 3
           <span className="ml-2 text-sm align-text-top bg-black text-white rounded px-1">
-            2.0 beta
+            3.0 beta
           </span>
         </h2>
-
-        <div className="max-w-lg text-center bg-yellow-400 text-stone-700 p-3 py-4 mt-4 rounded">
-          <h1 className="text-xl font-bold">Modo rápido</h1>
-          <span className="text-lg block">
-            Aqui você precisa ficar esperto com o tempo! Joque rápido e cuidado para não vacilar.
-          </span>
-
-          <span className="text-lg mt-2 block">
-            Ah!! E se não jogar no tempo, você <strong>PERDE!</strong>
-          </span>
-        </div>
       </div>
+      <div className="max-w-lg text-center bg-yellow-400 text-stone-700 p-3 py-4 my-4 mx-auto rounded">
+        <h1 className="text-xl font-bold">Modo Online</h1>
+        <span className="text-lg block">Jogue com seus amigos de qualquer lugar.</span>
+      </div>
+
       {finishGame && (
         <div className={`w-screen h-screen bg-black/60 absolute top-0 bottom-0 right-0 z-10`}>
           <div className="h-full flex items-center justify-center">
@@ -136,12 +132,6 @@ const QuickGame = () => {
           </div>
         </div>
       )}
-
-      <div className="flex flex-col my-3">
-        <div className="text-2xl">
-          Contador: <strong>{leftTime}</strong>s
-        </div>
-      </div>
 
       <div className="flex w-full max-w-[516px] mx-auto items-center justify-center relative">
         <div className={`grid-tabuleiro gap-1 w-full items-center flex-col max-w-lg`}>
@@ -169,25 +159,6 @@ const QuickGame = () => {
             )}
           </DndContext>
         </div>
-
-        {!gameStarted && (
-          <div className="bg-black/70 absolute top-0 bottom-0 right-0 left-0 rounded">
-            <div className="flex w-full h-full items-center justify-center">
-              <div className=" flex flex-col items-center gap-4 px-6 py-6 m-4 bg-white max-w-[400px] rounded">
-                <span className="text-xl">
-                  Faça um sorteio para saber quem vai começar e clique em começar
-                </span>
-
-                <button
-                  className="px-4 py-3 bg-orange-500 uppercase font-bold text-white rounded"
-                  onClick={startGame}
-                >
-                  Começar
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
       <div className="w-fit mx-auto mt-6">
         <h3 className="text-2xl">
@@ -198,4 +169,4 @@ const QuickGame = () => {
   );
 };
 
-export default QuickGame;
+export default OnlineGame;

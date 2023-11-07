@@ -19,6 +19,9 @@ export default function Home() {
           <Link href="/quick-game" className="px-6 py-3 rounded-sm text-center border-2 hover:bg-orange-500 hover:text-white  border-orange-500 ">
             Modo rápido
           </Link>
+          <Link href="/online" className="px-6 py-3 rounded-sm text-center border-2 hover:bg-orange-500 hover:text-white  border-orange-500 ">
+            Online Clássico
+          </Link>
         </div>
       </div>
     </div>
